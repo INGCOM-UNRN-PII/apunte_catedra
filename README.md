@@ -17,44 +17,50 @@ Se pueden usar guiones bajos en los literales numéricos:
 long enteroLargo = 123_456_789L;
 ```
 
+Tambien esta [`java.math.BigInteger`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigInteger.html) para números enteros de cualquier tamaño y [`java.math.BigDecimal`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html) para números decimales de precisión arbitraria.
+
+
 # Métodos
 
-Son un bloque de código que se ejecuta cuando es llamado. Existen dentro de una `clase`
-## Sintaxis
+Son un bloque de código que se ejecuta cuando es llamado. Existen dentro de una `class`
+## Sintaxis completa para un método/función
+
 ```java
 <modificador acceso><otros modificadores><modificador retorno><nombre método>(parámetros) throws <excepciones>{
 //código
-return <variable del mismo tipo del método> //excepto si es `void`
+    return <variable del mismo tipo del método> //excepto si es `void`
 }
 ```
-
+El retorno puede existir en un método `void`, devolviendo el control a quien llama.
 ## Tipo de acceso
 * ninguno : Si no ponemos nada, el método es visible por todo el paquete
 * `public` es visible por todas las demás clases.
 * `private` sólo es visible dentro de su clase.
-*  `protected` sólo visible por su clase y sus subclases.
+* `protected` sólo visible por su clase y sus subclases.
 ## Otros modificadores
 Los únicos modificadores relevantes a la cátedra son
-* `static` el método perteneces a la clase, no a sus instancias, y puede llamarse sin instanciar la clase.
-* `final` el método no puede ser sobreescrito en subclases con `@Override`
-* `abstract` el método no tiene implementación (no tiene código), sebe ser implementado por subclases.
+* `static` el método perteneces a la clase, no a sus instancias, y puede llamarse sin una instancia, esto implica que no hay referencia `this`.
+* `final` el método no puede ser sobreescrito en subclases.
+* `abstract` el método no tiene implementación (no tiene código), sebe ser implementado por subclases, esto implica que la clase en sí es `abstract` también.
 ## Tipo de retorno
 Cualquier tipo primitivo o clase, o `void` si no retorna nada.
 ## Parámetros
-Separados por comas, cada parámetro debe indicar su tipo, como `int valor`. Pueden ingresarse múltiples parámetros con `...`, por ejemplo `String cadenas...` es considerado como un arreglo de `String` de cualquier longitud (incluso cero).
+Separados por comas, cada parámetro debe indicar su tipo, como `int valor`. Pueden ingresarse múltiples parámetros con `...`, por ejemplo `String cadenas...` es considerado como un arreglo de `String` de cualquier longitud (incluso cero), esto es llamado `va-args`, argumentos de largo variable.
 ## Excepciones
 Sólo deben declararse excepciones no evitables, del tipo `Exception`, como por ejemplo `IOException`. Las excepciones del tipo `RuntimeException` deben documentarse pero no declararse.
 
 # Entrada y salida de datos
+[`java.lang.System`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/System.html#out)
 
 Para formatear cadenas similar a `C`, puede usarse las instrucciones
 ```java
-//Para imprimir a consola
+// Para imprimir a consola
 System.out.printf("cadena formateada %d", numero);
-//Para almacenar cadenas con formato
+// Para almacenar cadenas con formato
 String cadena = String.format("cadena formateada %d", numero)
 ```
 Para imprimir a consola también está `System.out.println()` que agrega automáticamente un salto de línea, aunque no puede aplicarse formato de manera directa.
+
 En **Intellij Idea**, los atajos son:
 ```java
 System.out.println() // sout
@@ -62,16 +68,19 @@ System.out.printf()  // souf
 ```
 El modificador de cadena `'%n'` se usa como salto de linea en cualquier plataforma.
 ## Métodos útiles de String
+[`java.lang.String`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html)
 ```java
+//dada una cadena
 String cadena = "sarasa abcdef";
 int largo = cadena.length() // 13
 char caracter = cadena.charAt(2) // 'r'
 String subcadena1 = cadena.substring(4) // "sa abcdef" hasta el final
 String subcadena2 = cadena.substring(4, 9) // "sa ab" inicio inclusivo, final exclusivo
+
 String cadena2 = "SARASA AbCdEf"
 boolean esIgual = cadena.equalsIgnoreCase(cadena2) // true
-boolean empiezaCon = cadena.startsWith("sar") //true
-boolean terminaCon = cadena.endsWith("cdef") //true
+boolean empiezaCon = cadena.startsWith("sar") // true
+boolean terminaCon = cadena.endsWith("cdef") // true
 int indice = cadena.indexOf('a') // 1, busca el primero
 int indice2 = cadena.indexOf('a',6) // 7, busca el primero despues del indice especificado. Devuelve -1 sino hay.
 int indiceMax = cadena.lastIndexOf('a') // 7, busca el último
@@ -83,6 +92,8 @@ char[] letras = cadena.toCharArray // devuelve un array de char
 String otraCadena = String.join("-", letras) // "s-a-r-a-s-a- -a-b-c-d-e-f"
 ```
 Importante a tener en cuenta: **los String son inmutables**, por lo que cualquier modificación a la cadena genera un **nuevo** String.
+
+Y como son inmutables, concatenar en un lazo, crea una nueva cadena en por cada `+`. Para evitar esto, utilizar [`java.lang.StringBuilder`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StringBuilder.html) que se explica mas abajo.
 
 ## Scanner
 
@@ -103,6 +114,7 @@ Importante a tener en cuenta que cerrar el `Scanner` con `Scanner.close()` cierr
 
 ## Constantes
 `final tipoDeDato NOMBRE_VARIABLE_SNAKE_CASE = valor`
+Se utiliza la palabra clave `final`, que puede ser utilizada en argumentos de funciones y variables locales.
 ## Operadores
 * Asignación `a = b`
 * Posfijos `a++ b--`
@@ -110,7 +122,7 @@ Importante a tener en cuenta que cerrar el `Scanner` con `Scanner.close()` cierr
 * Aritméticos `+ - * / %` Si la operación es entre enteros, `a / b` devuelve un entero.
 ## Control
 ### Condicionales
-if
+#### if
 ```java
 if(condicion1){
   //se ejecuta si condicion es verdadera
@@ -120,7 +132,7 @@ if(condicion1){
   //se ejecuta si ambas condiciones son falsas
 }
 ```
-switch
+#### switch
 ```java
 int valor;
 //codigo que asigna un valor
@@ -137,14 +149,14 @@ switch(valor){
     //si no se cumple ninguno de los casos
 }
 ```
-while
+#### while
 ```java
 while(condicion){
   //se ejecuta mientras condicion sea verdadera
   //puede usarse `break` para terminar el bucle
 }
 ```
-for simple
+#### for tradicional
 ```java
 for(inicializacion, condicion, incremento){
   //Inicializacion e incremento pueden tener multiples sentencias separadas por coma. Si hace falta ponermultiples condiciones se hace con &&
@@ -153,7 +165,7 @@ for(inicializacion, condicion, incremento){
   //incremento: i++, j--
 }
 ```
-for mejorado
+#### for mejorado (`for-each`)
 ```java
 for(tipoElemento nombreElemento : coleccion){
   //Recorre todos los elementos de una colección que contiene tipoElemento
@@ -162,8 +174,7 @@ for(tipoElemento nombreElemento : coleccion){
 
 # Arreglos
 
-
-Son secuencias *mutables* de elementos de un tupo con largo fijo.
+Son secuencias *mutables* de elementos de un único tipo y de largo fijo.
 
 Declaración:
 ```java
@@ -186,20 +197,20 @@ Una excepción es cualquier interrupción en el flujo normal del programa. Se pu
 * **Delegar** - Si la excepción ocurre dentro de un método y no la atajamos, la excepción pasa al lugar que llamó al método.
 * **Prevenir** - Si sabemos que puede haber una excepción podemos tomar medidas para impedirla, por ejemplo en una división podemos impedir que el divisor sea cero.
 
-Bloque try-catch
+## Bloque try-catch
 ```java
 try{
   //código que puede fallar. Si una línea de código arroja una excepción, las lineas siguientes NO se ejecutan.
 } catch (TipoExcepcion nombreExcepcion){ //Generalmente se la llama `e`
   //opcional, se ejecuta si el bloque anterior arroja uina excepción
-  //Aquí se maneja lo que ocurre luego de la excepcion, que puede ser un mensaje de error, una llamada a función, o imcluso se puede arrojar otra excepción distinta para delegarla.
+  //Aquí se maneja lo que ocurre luego de la excepción, que puede ser un mensaje de error, una llamada a función, o incluso se puede arrojar otra excepción distinta para delegarla.
 } finally {
-  //opcional, se ejecuta SIEMPRE despues del try. Si no se usó un `catch`, este bloque debe existir.
+  //opcional, se ejecuta SIEMPRE después del try. Si no se usó un `catch`, este bloque debe existir.
   //Puede ser util para limpieza, por ejemplo si al leer un archivo salta un error, este bloque se puede usar para cerrar el archivo antes de salir del bloque.
 }
 ```
 
-Para arrojar excepciones, se usa la instrucción `throw`
+Para arrojar excepciones, se usa la instrucción `throw` seguido de una instancia de Excepción, que se crea con la palabra reservada `new`. (para mas detalles de esto, ver la parte de Orientación a Objetos)
 
 ```java
 throw new NombreExcepción(); //sin mensaje
@@ -232,10 +243,14 @@ int miMetodo() throws IOException
 ```
 * **Error** - Problemas graves típicamente no manejables. No se manejan ni declaran. Ejemplos: `OutOfMemoryError`, `StackOverflowError`.
 
+**Un detalle sobre atajar excepciones**, En el manejo de excepciones en Java, es fundamental entender qué tipo de excepción estás capturando. Al utilizar un bloque `catch` para `RuntimeException`, `Exception` o `Error`, estás abarcando un espectro muy amplio. En esencia, al capturar cualquiera de estas clases base, estarás "atrapando" todas las situaciones excepcionales que se deriven de ellas.
+
+Es importante atajar solo lo que estamos preparados, porque es posible que suprimamos una excepción que no tenia nada que ver con lo que estábamos programando.
+
 # Funciones y efectos secundarios
 
 En Java, todos los argumentos pasan por valor, lo que significa que:
-* **Argumentos primitivos** (int, float, etc.) - Se pasa a la función una copia del valor actual. Cualquier cambio hecho al valor dentro de la función **no afecta al original**.
+* **Argumentos primitivos** (`int`, `float`, etc.) - Se pasa a la función una copia del valor actual. Cualquier cambio hecho al valor dentro de la función **no afecta al original**.
 * **Referencias a objetos** (incluyendo arreglos) - Se pasa una copia **de la referencia** al objeto. El parámetro **apunta a la misma dirección de memoria** que el objeto original. Cualquier cambio hecho al parámetro **será reflejado en el objeto original**. Para evitar esto, podemos reasignar el parámetro a un **nuevo objeto** dentro de la función. En este sentido, es parecido a pasar punteros en C, con la diferencia que no se puede hacer aritmética de punteros.
 
 Si queremos pasar un arreglo pero no queremos modificar el original podemos pasar una copia (o podemos copiarlo dentro de la función) con la instrucción
@@ -298,7 +313,7 @@ String cadena = sb.toString();
 
 # Archivos
 
-"Nueva forma", aparece en **Java 8**.
+"Nueva forma", aparece desde **Java 8**.
 
 ## java.nio.file.Path
 Es una **interfaz** que representa la ruta de una carpeta o archivo. Se usa para manipular nombres de archivo o carpetas, y para interactuar con la clase `java.nio.file.Files` para manipular directamente archivos (copiar, borrar, mover, etc.)
@@ -453,8 +468,8 @@ Una **clase** es la plantilla para crear el objeto. Define la estructura y **com
 12) **Composición** - Es una asociación *fuerte*, donde una clase contiene una referencia a otra(s). En composición, el objeto referenciado no puede existir sin su contenedor, como un motor en un auto. El auto absolutamente necesita un motor para andar, y si el auto desaparece, su motor desaparece con él. Usualmente se implementa creando el objeto referenciado al construir el contenedor, o mediante un método del contenedor.
 13) **Agregación** - Es una asociación, esta vez  *débil*, donde una clase contiene una referencia a otra(s). En agregación, el objeto referenciado puede existir independientemente al contenedor, como un colectivo y sus pasajeros. Un colectivo tiene pasajeros, pero los pasajeros siguen existiendo si el colectivo deja de existir. Usualmente el objeto referenciado ya existe de manera independiente, y se le pasa como argumento al contenedor en su constructor o en algún método.
 14) **Encapsulamiento** - Es el acto de impedir el acceso directo a los atributos.
-15) **this** - Palabra clave que referencia al objeto en sí.
-16) **super** - Palabra clave que referencia al objeto padre.
+15) **`this`** - Palabra clave que referencia al objeto en sí.
+16) **`super`** - Palabra clave que referencia al objeto padre.
 17) **Sobrecarga** - La existencia de varios métodos con el mismo nombre pero con diferentes tipos de argumentos.
 
 ## Sintaxis de POO en Java
@@ -498,24 +513,24 @@ Contacto pepito = new Contacto(7);
 
 ### Modificadores de acceso
 
-* **public** - Accesible por todas las demás clases. Para mantener encapsulamiento no debe usarse en atributos.
-* **protected** - Accesible por la misma clase y sus subclases.
-* **private** - Accesible sólo por objetos dentro de la misma clase.
-* ninguno - Accesible por todas las clases del mismo paquete.
+* **`public`** - Accesible por todas las demás clases. Para mantener encapsulamiento no debe usarse en atributos.
+* **`protected`** - Accesible por la misma clase y sus subclases.
+* **`private`** - Accesible sólo por objetos dentro de la misma clase.
+* _ninguno_ - Accesible por todas las clases del mismo paquete.
 
 ## Sobrecarga de métodos
 
 La sobrecarga permite la existencia de varios métodos con el mismo nombre, pero con distintos parámetros. Un ejemplo de sobrecarga son los dos constructores en el código de ejemplo de arriba. Uno de los constructores no tiene parámetros, mientras que el otro tiene un parámetro de tipo `int`.
 
-# Clase Object
+# Clase `Object`
 
 La clase `Object` es la clase padre superior a todas las clases, esto es, todas las clases en Java son subclases de `Object` o de alguna de sus subclases.
 Tiene tres métodos que todos sus descendientes heredan.
-* **equals(Object o)**  - Devuelve `true` si el objeto es igual al objeto `o`.
-* **hashCode()** - Devuelve un número "único" que representa al objeto.
-* **toString()** - Devuelve una representación en forma de `String` del objeto.
+* **`equals(Object o)`**  - Devuelve `true` si el objeto es igual al objeto `o`.
+* **`hashCode()`** - Devuelve un número "único" que representa al objeto.
+* **`toString()`** - Devuelve una representación en forma de `String` del objeto. Este método se llama automáticamente al concatenar con una cadena.
 
-## Override
+## `@Override`
 Estos métodos (y cualquier método heredado que no sea `final`) pueden ser reescritos por sus subclases. Se marca dicha reescritura con la etiqueta `@Override`, por ejemplo, en la clase `Contacto` de arriba podríamos agregar este método:
 ```java
 @Override
@@ -525,14 +540,21 @@ String toString(){
 ```
 El "Override" es distinto a la sobrecarga, porque la sobrecarga cambia los argumentos, mientras que el "Override" usa los mismos argumentos que el método original.
 
+La anotacion `@Override` se utiliza para indicar que estamos sobreescribiendo un método de la super-clase, esta existe para forzar a que el método sea uno de la clase superior, en lugar de una sobrecarga. Tengan en cuenta que una clase puede sobrecargar sin sobreescribir, viceversa y ambas.
+
 ## Override de equals y hashCode
 Estos métodos pueden ser reescritos, pero deben ser consistentes entre sí.
 El método `equals` es lo que le da identidad a los objetos, cuando queremos ver si dos objetos son "iguales", usamos este método. Sin embargo, la igualdad puede depender de varios factores. En algunos casos, queremos una igualdad estricta, esto quiere decir que dos objetos son iguales si **todo** su estado coincide, pero en otros casos con que sólo algunas partes sean iguales nos alcanza. En estos casos, haremos un "Override" de tanto `equals` como de `hashCode`, que están relacionados.
 
 Un `equals` debe cumplir con las tres reglas matemáticas de la igualdad, es decir:
-1) **Reflexividad** - A == A para cualquier A
-2) **Simetría** - Si se cumple que A == B, entonces debe cumplirse que B == A
-3) **Transtitividad** - Si A == B, y B == C, entonces debe cumplirse que A == C
+1.  **Reflexividad**
+    Para cualquier referencia no nula `A`, la expresión $A == A$ debe ser siempre `true`. Esto significa que un objeto siempre debe ser igual a sí mismo.
+
+2.  **Simetría**
+    Para cualquier referencia no nula `A` y `B`, si la expresión $A == B$ es `true`, entonces la expresión $B == A$ también debe ser `true`. En otras palabras, si `A` es igual a `B`, entonces `B` también debe ser igual a `A`.
+
+3.  **Transitividad**
+    Para cualquier referencia no nula `A`, `B` y `C`, si la expresión $A == B$ es `true` y la expresión $B == C$ también es `true`, entonces la expresión $A == C$ debe ser `true`. Esto implica que si `A` es igual a `B` y `B` es igual a `C`, `A` también debe ser igual a `C`.
 
 El **Intellij IDEA** ofrece un "wizard" muy robusto para reescribir `equals` y `hashCode`, pero veamos ejemplos con la siguiente clase:
 ```java
@@ -586,3 +608,5 @@ public int hashCode(){
   return Objects.hash(dni, id);
 }
 ```
+
+De todas formas, para `hashCode` prefieran utililizar las funciones de libreria como (`java.util.Objects#hash(Object...)`[https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)]
