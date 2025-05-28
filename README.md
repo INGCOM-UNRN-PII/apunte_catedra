@@ -344,13 +344,21 @@ normalize()
 Las rutas relativas usan el directorio actual como base. Por ejemplo, el archivo "./archivo.java" es un archivo en la misma carpeta, mientras que "../otraCarpeta/otroArchivo.txt" es un archivo en una carpeta paralela:
 
 > Carpeta Padre ( .. )
->    │             │
->    │             │
->    │             └──────── otraCarpeta
->    │                                       │
-> **Carpeta Actual** ( . )              └─  otroArchivo.txt
+
+>    │             │
+
+>    │             │
+
+>    │             └──────── otraCarpeta
+
+>    │                                   │
+
+> **Carpeta Actual** ( . )         └─  otroArchivo.txt
+
 >    │
+
 >    └─ archivo.java
+
 ## java.nio.file.Paths
 A pesar del nombre similar, esta clase contiene sólo un método, específicamente un método estático utilitario con una sobrecarga, que se usa para crear objetos del tipo `Path`.
 ```java
@@ -610,3 +618,397 @@ public int hashCode(){
 ```
 
 De todas formas, para `hashCode` prefieran utililizar las funciones de libreria como (`java.util.Objects#hash(Object...)`[https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)]
+
+## Polimorfismo
+
+**Polimorfismo**, que quiere decir *muchas formas*, es un concepto fundamental en POO que permite a los **objetos de diferentes clases** ser tratados como **objetos de un tipo en común**. También permite escribir código más flexible, extensible y fácil de mantener.
+
+La forma más habitual de polimorfismo en Java se hace con **herencia** e **interfaces**.
+
+Conceptos clave:
+### Herencia
+Cuando una **subclase** extiende a una **superclase**, la **subclase** hereda los métodos y atributos no privados de la **superclase**. Es muy útil pensar esta relación como "**es un**", por ejemplo si `Perro` extiende `Animal`, decimos que `Perro` **es un** `Animal`.
+Una **subclase** puede sobreescribir los métodos no privados de la **superclase**. En nuestro ejemplo, podemos tener:
+```java
+public class Animal{
+
+  public String hacerRuido(){
+    return "Grrr";
+  }
+}
+
+public class Perro extends Animal{
+
+  @Override
+  public String hacerRuido(){
+    return "Guau";
+  }
+}
+
+public class Gato extends Animal{
+
+  @Override
+  public String hacerRuido(){
+    return "Miau";
+  }
+}
+
+public class Oso extends Animal{
+
+  //Esta subclase NO sobreescribe el método
+}
+```
+
+Una técnica útil es el ***upcasteo***, o casteo hacia arriba. En el ejemplo de arriba, podemos instanciar un `Animal` de la siguiente forma:
+```java
+Animal miAnimal = new Animal(); //Es un Animal, sin subclase.
+Animal miPerro = new Perro(); //Es un Perro, pero también es un Animal
+Animal miGato = new Gato(); //Es un Gato, pero también es un Animal
+Animal miOso = new Oso(); //Es un Oso, pero también es un Animal
+```
+Esto es muy útil porque a pesar de ser cada uno de una clase diferente a la vez son todos tambíen de la clase `Animal`.
+
+Si el método fue sobreescrito por una **subclase**, ese es el método invocado. Si no, se invoca el método de la **superclase**.
+```java
+miAnimal.hacerRuido() //Imprime "Grrr"
+miPerro.hacerRuido() // Imprime "Guau"
+miGato.hacerRuido() // Imprime "Miau"
+miOso.hacerRuido() //Imprime "Grrr"
+```
+
+Para verificar si un objeto es de una clase en particular, podemos hacer **pattern matching**, usando el operador binario `instanceOf`, que devuelve `true` si el objeto es de la clase en cuestión:
+```
+miAnimal instanceOf Animal // esto es `true`
+miPerro instanceOf Animal // esto es `true``, porque Perro es un Animal
+miAnimal instanceOf Perro // esto es `false`, porque Animal no es un Perro.
+```
+
+### Clases y métodos abstractos
+
+La **abstracción** en POO quiere decir enfocarse en las cualidades de un **objeto** en lugar de su implementación específica. Se trata de ocultar complejidad y mostrar sólo lo necersario.
+Una **clase abstracta** es una clase que no se puede instanciar de modo directo (no podemos usar `new`), sino que es una plantilla para sus **subclases**.
+Sus métodos también pueden ser abstractos. Un **método abstracto** es un método sin implementación, sólo tiene su declaración. La idea es que el código sea implementado por alguna **subclase**.
+El modificador que usamos es `abstract`. Vamos a modificar la clase `Animal` que usamos antes para mostrar una clase abstracta:
+```java
+public abstract class Animal{
+  private String nombre;
+  
+  // Constructor que recibe el nombre del animal
+  public Animal(String nombre){
+    // Necesitamos usar `this` para diferenciar el atributo llamado nombre
+    // del argumento con el mismo nombre.
+    this.nombre = nombre;
+  }
+
+  // Método abstracto, alguna de sus subclases deberá implementar el código
+  public abstract void hacerRuido();
+
+  // Método concreto, ya tiene código. Igual, si quisiéramos, podríamos
+  // reescribirlo en una subclase con un @Override
+  public void dormir(){
+    System.out.println("Shhh... " + nombre + " está dormido.");
+  }
+}
+```
+
+Al heredar de esta **superclase**, sus **subclases** (o una subclase de la subclase) deben implementar el código de los métodos abstractos:
+```java
+public class Perro extends Animal{
+  
+  // Constructor que recibe el nombre del perro
+  public Perro(String nombre){
+    // Le pasamos el argumento a `super`, para que la superclase termine
+    // de instanciar el objeto.
+    super(nombre);
+  }
+
+  // Método concreto
+  public void hacerRuido(){
+    System.out.println("Guau");
+  }
+
+  //No hace falta reescribir dormir()
+}
+```
+
+Para usar estas clases, podemos hacer:
+```java
+// Instanciamos la clase Perro directamente
+Perro miPerro = new Perro("Fido");
+// Usamos polimorfismo. Esto sí está permitido, lo que so se puede hacer
+// es instanciar directamente `new Animal()`
+Animal miOtroPerro = new Perro("Pancho"); 
+
+miPerro.hacerRuido() // Imprime "Guau"
+miOtroPerro.dormir() // Imprime "Shhh... Pancho está dormido."
+```
+Otra opción es que la **subclase** tampoco implemente el código, aunque en este caso, una **subclase** de esa **subclase** debe implementarlo. En resumen, algún descendiente tiene que implementar lo abstracto.
+### Interfaces
+
+Una **interfaz** es similar a una **clase abstracta**, pero sólo contiene **métodos abstractos**. Pueden también tener atributos, pero estos atributos sirven como constantes públicas, porque son automáticamente `public`, `static` y `final`, es decir que son accedidos por cualquier clase sin necesidad de instanciar un objeto, y no pueden ser modificados.
+Definen un **contrato** de lo que puede hacer una clase pero no especifica *como* lo hace.
+
+Pueden usar **herencia**, es decir que pueden tener a otra **interfaz** como **subclase** (con `extends`), pero para usarlas en una clase regular se usa otro concepto, el de **implementación**.
+Implementar una **interfaz** implica implementar todos sus métodos, o declararlos como abstractos para que alguna **subclase** los implemente.
+
+Por ejemplo, arriba mencionamos la clase `Animal` y sus subclases. En lugar de heredar el método `hacerRuido()` de la **superclase**, podemos dejar este método en una **interfaz**, llamada por ejemplo `Parlante` (que habla), y podemos implementar esa **interfaz** en las clases en cuestión.
+
+Un ejemplo más concreto sería así:
+```java
+public interface Parlante{
+  public String hacerRuido();
+}
+```
+La clase padre lo implementa de la siguiente manera:
+```java
+public class Animal() implements Parlante{
+  @Override
+  public String hacerRuido(){
+    return "Grrr";
+  }
+}
+```
+Una subclase, de esta manera
+```java
+//No hace falta implementar la interfaz en las subclases
+public class Perro() extends Animal{ 
+  @Override
+  public String hacerRuido(){
+    return "Guau";
+  }
+}
+```
+
+De este modo, si necesito un objeto que pueda hacer ruido, en lugar de pedir uno del tipo `Animal`, puedo pedir directamente uno del tipo `Parlante:
+```java
+void imprimeSonido(Parlante hablador){
+  System.out.println(hablador.hacerRuido());
+}
+```
+Este método puede recibir cualquier tipo de `Animal`.
+
+Lo más interesante es que podemos armar *otras* clases que también implementen `Parlante`, y también se las podemos pasar al método `imprimeSonido`, por ejemplo:
+```java
+public class Humano() implements Parlante{
+  private String nombre;
+
+  public Humano(String nombre){
+    this.nombre = nombre;
+  }
+
+  @Override
+  public String hacerRuido(){
+    return "Hola, mi nombre es " + nombre;
+  }
+}
+
+public class Silbato() implements Parlante{
+    
+  @Override
+  public String hacerRuido(){
+    return "Piiiiiiii";
+  }
+}
+```
+
+En conclusión:
+* Así como las **clases** son las plantillas de los **objetos**, las **interfaces** con plantillas de las **clases**. Su principal uso es definir un **contrato**, especificando los métodos que tienen que usar las **clases** que la implementen.
+* Pueden usarse como un tipo de variable, ampliando el rango de opciones de **polimorfismo** a cualquier **clase** que implemente a dicha **interfaz**.
+* Resuelven el problema de que cada **clase** puede tener una sola **superclase**, porque se pueden implementar varias **interfaces** a la vez.
+* Son cruciales para los **Patrones de diseño**.
+
+### Genéricos
+
+Los **genéricos** permiten escribir código que operen con diversos tipos de datos. Para indicar un tipo **genérico** se suele usar una letra entre llaves angulares, en general `<T>` (T de Tipo), aunque también se usan `<E>` (Elemento), `<K>` (Key), `<V>` (Valor), etc. Son un parámetro más como un `int valor` o un `String nombre`, pero definen un **tipo de dato** en lugar de su valor.
+Su uso **no es obligatorio**, porque existe el tipo `Object` que engloba a todo lo que se les ocurra, pero esa es precisamente su debilidad, es demasiado abarcativo, y requiere castear los `Object` al tipo de dato que necesitamos, lo cual implica hacer **pattern matching** y puede fallar.
+
+Ejemplo de uso:
+```java
+//T es el tipo de dato. Puede ser cualquier descendiente de Object, es decir
+//que puede ser un arreglo, un `Perro`, un `Integer`, etcétera.
+class Caja<T>{
+  // El contenido ahora es ahora un arreglo del tipo "T"
+  private T[] contenido;
+
+  //El constructor recibe un arreglo del tipo "T"
+  public Box(T[] contenido);
+
+  public void imprimirContenido(){
+    // Imprime todos los elementos del arreglo usando cualquiera que sea
+    // la implementación de toString para el tipo específico de dato "T"
+    for (T elemento : contenido){
+      System.out.print(elemento + ", ");
+    }
+  }
+}
+```
+
+Los **genéricos** también pueden ser muy abarcativos, pero existe una forma de limitar qué tipo de dato podemos usar, con `extends`.
+```java
+// Limitamos el tipo de T a Number y sus subclases
+// En métodos el <T> se pone antes del tipo de de dato
+public <T extends Number> double promedio(T[] arreglo){
+  double suma;
+  
+  // Pedimos que T extienda Nummber para que no falle la suma, que sólo está
+  // definida para Number y sus descendientes
+  for(T numero : arreglo){
+    suma = suma + numero;
+  }
+
+  //La división solo funciona en Number
+  return suma / arreglo.length;
+}
+```
+
+El **genérico** puede extender cualquier **clase** o **interfaz**. Si extiende una **interfaz**, entonces se puede usar cualquier clase que implemente dicha **interfaz**.
+```java
+// Un T extends Comparable<T> nos asegura que el item tiene implementado
+// el método `compareTo` que exige el contrato de la interfaz Comparable.
+public <T extends Comparable<T>> int compare(T item1, T item2){
+  return item1.compareTo(item2);
+}
+```
+
+#### Type erasure
+Los **genéricos** en Java son implementados con una técnica llamada **type erasure** o "eliminación de tipo". Esto implica que los `<T>` son usados por el compilador para verificar tipos. En tiempo de ejecución (cuando el programa está corriendo), la información de tipo de los **genéricos** es mayormente eliminada, y el **genérico** se trasforma en su tipo base (por ejemplo, `List<String>` se transforma en un `List` a secas.)
+Este comportamiento es necesario por compatibilidad con versiones anteriores de Java que no usaban **genéricos**.
+
+En tiempo de compilación el compilador verifica el tipo de datos, para que por ejemplo solo se pueda pasar un `String` a un objeto del tipo `Caja<String>`.
+
+En tiempo de ejecución, se elimina la información genérica, por ejemplo `Caja<String>` se vuelve `Caja`. A su vez, `T` se reemplaza por su **tipo eliminado**, que es `Object` sino se hizo `Extends`, o el tipo base si se hizo `extends`. Por ejemplo, en `Caja<T extends Number>`, el tipo `T` se convierte en `Number`.
+
+Una analogía en la vida real sería tener cajas de frutas `Caja<Fruta>`. En tiempo de compilación la fábrica (el compilador) sabe que sólo puede poner frutas, pero una vez que sale de la fábrica y pasa al galpón (en ejecución), a menos que le hayamos puesto una etiqueta, para los trabajadores del galpón es sólo una "Caja".
+
+Implicaciones:
+1) No se puede usar `instanceOf` con **genéricos**.
+```java
+miCaja instanceOf Caja<Fruta>; //genera un error del compilador
+miCaja instanceOf Caja; //es válido
+```
+2) No se pueden hacer arreglos concretos de **genéricos**.
+```java
+T[] arreglo = new T[10]; // falla
+T[] arreglo; // no falla
+```
+3) No se pueden usar **genéricos** en sobrecargas. 
+```java
+//En tiempo de ejecución, en ambos casos los argumentos se transforman
+//en (Caja miCaja), y como las sobrecargas necesitan tener tipos de  datos
+//diferentes, esto falla.
+void imprimeElementos(Caja<Fruta> miCaja);
+void imprimeElementos(Caja<Verduras> miCaja);
+```
+
+## Ejemplos de interfaces útiles
+
+### `Iterable<T>`
+
+`Iterable` es un ejemplo de una **interfaz** muy utilizada. Su método principal que hay que implementar es
+```java
+// Devuelve un `Iterator` sobre elementos del tipo "T"
+Iterator<T> iterator();
+```
+Esta interfaz sirve para marcar una **clase** que la implemente como capaz de usar un `Iterator`.
+
+### `Iterator<E>`
+
+`Iterator` es una interfaz que contiene los **métodos** necesarios para recorrer una lista de elementos.
+```java
+public interface Iterator<E>{
+
+  // Devuelve true si quedan elementos por recorrer
+  boolean hasNext();
+
+  // Devuelve el siguiente elemento, del tipo genérico "E"
+  E next(){}
+
+  // Tiene otros métodos pero no hace falta verlos ahora
+}
+```
+La **clase** que lo implementa decide como recorrer la lista.
+
+### `Comparable<T>`
+
+`Comparable` es una **interfaz** usada para marcar una **clase** como capaz de comparar sus elementos entre sí. Por ejemplo, podemos comparar **objetos** del tipo **Caja** según su cantidad de elementos.
+Tiene sólo un **método** para implementar
+```java
+// Compara este objeto con el otro objeto. 
+int compareTo(T otro);
+```
+
+### `Comparator<T>`
+
+`Comparator` ofrece métodos para crear una forma de comparar **objetos**.
+```java
+public interface Comparator<T>{
+  // Compara un elemento con otro. A diferencia del método en Comparable
+  // este método recibe dos objetos como argumento.
+  public int compare(T unElemento, T otroElemento);
+}
+```
+
+Esta **interfaz** también tiene varios comparadores estáticos. Uno de los más útiles es `Comparator.reverseOrder`.
+Se usan los `Comparator` en métodos de ordenamiento como `Arrays.sort(T[] arreglo, Comparator<? super T> comparador)`
+
+## Implementación  de interfaces
+
+Las **interfaces** requieren que sus **métodos** sean implementados, lo cual puede lograrse por ejemplo así:
+```java
+class Auto implements Comparable<Auto>{
+  private int cilindrada;
+  
+  // Comparamos por cilindrada
+  @Override
+  public int compareTo(Auto otroAuto){
+    return this.cilindrada - otroAuto.cilindrada;
+  }
+}
+```
+
+Podemos crear varios `Comparator` en la misma **clase**. No hace falta implementar `Comparator` en la **clase** misma, porque la **clase** no es un comparador, simplemente lo usa.
+```java
+class Auto{
+  public Comparator<Auto> porPatente;
+  public Comparator<Auto> porMarca;
+}
+```
+Faltaría hacer las **clases** `porPatente` y `porMarca` e implementar los **métodos** necesarios.
+
+Sin embargo, la forma más cómoda de crear estas clases es dentro de la clase misma que los va a usar.
+
+### Clases internas
+
+Una **clase interna** es simplemente una **clase** dentro de otra. 
+```java
+class Auto{
+  private int patente;
+    
+  private static class porPatente implements Comparador<Auto>{
+    @Override
+    public int compare(Auto auto1, Auto auto2){
+      return auto1.patente - auto2.patente;
+    }
+  }
+}
+```
+De este modo, al estar dentro de `Auto`, pueden acceder a `patente` que es privado y no podría accederse desde afuera de la **clase** sin romper el encapsulamiento.
+
+Una forma aún más conveniente es el de la **clase interna anónima**. Para esto usamos la siguiente sintaxis:
+```java
+class Auto{
+  private int patente;
+
+  // El Intellij IDEA autocompleta la mayor parte de la estructura al escribir
+  // los primeros renglones.
+  public Comparator<Auto> porSerie() {
+    return new Comparator<>(){
+      @Override
+      public int compare(Auto auto1, Auto auto2){
+        return auto1.serie - auto2.serie;
+      }
+    }
+  }
+}
+```
+
