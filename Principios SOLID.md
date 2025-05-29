@@ -36,13 +36,8 @@ Según "Clean Code" de Robert C. Martin (publicado alrededor de 2008), los princ
 
 Una clase debe tener una y solo una razón para cambiar, lo que significa que debe tener una única responsabilidad bien definida. Esto no implica que una clase deba tener un solo método, sino que todas las funcionalidades dentro de esa clase deben estar relacionadas con su única responsabilidad. Separar las responsabilidades ayuda a evitar que los cambios en una parte del sistema afecten a otras partes no relacionadas, y facilita la comprensión y el mantenimiento del código.
 
-Ejemplo:
-
-Imagina una clase Reporte que se encarga de generar un informe, imprimirlo y guardarlo en una base de datos.
-
-Java
-
-```
+Por ejemplo, hagamos una clase `Reporte` que genera un informe, lo imprime y lo guarda en una base de datos.
+```java
 class Reporte {
     String generarContenido() { /* ... */ }
     void imprimir() { /* ... */ }
@@ -50,7 +45,7 @@ class Reporte {
 }
 ```
 
-Esta clase viola el SRP porque tiene tres responsabilidades distintas: generación de contenido, impresión y persistencia. Si cambia la forma de imprimir, o la forma de guardar, o el formato del reporte, esta única clase deberá ser modificada.
+Esta clase viola el SRP porque tiene tres responsabilidades distintas: generación de contenido, impresión y guardado. Si cambia la forma de imprimir, o la forma de guardar, o el formato del reporte, esta única clase deberá ser modificada.
 
 Según el SRP, sería mejor separar estas responsabilidades en clases distintas:
 ```java
@@ -62,22 +57,20 @@ class ImpresorReporte {
     void imprimir(String contenido) { /* ... */ }
 }
 
-class PersistorReporte {
+class GuardadorReporte {
     void guardarEnBaseDeDatos(String contenido) { /* ... */ }
 }
 ```
 
-De esta manera, si la lógica de impresión cambia, solo `ImpresorReporte` se ve afectado. Si la forma de guardar cambia, solo `PersistorReporte` necesita ser modificado.
+De esta manera, si la lógica de impresión cambia, solo `ImpresorReporte` se ve afectado. Si la forma de guardar cambia, solo `GuardadorReporte` necesita ser modificada.
 
 ---
 
 ## **OCP, Open/Closed Principle (Principio Abierto/Cerrado)**
 
-Las entidades de software (clases, módulos, funciones, etc.) deben estar **abiertas a extensión**, pero **cerradas a modificación**. Esto significa que el comportamiento de un módulo puede extenderse sin modificar su código fuente existente. La clave para aplicar el OCP es el uso de abstracciones (interfaces o clases abstractas) y polimorfismo. Al definir contratos (interfaces) y permitir que las implementaciones concretas varíen, se puede añadir nueva funcionalidad sin alterar el código que ya funciona y ha sido probado.
+Las clases y métodos deben estar **abiertos a extensión**, pero **cerrados a modificación**. Esto significa que el comportamiento puede extenderse sin modificar su código fuente existente. La clave para aplicar el OCP es el uso de abstracciones (interfaces o clases abstractas) y polimorfismo. Al definir contratos (interfaces) y permitir que las implementaciones concretas varíen, se puede añadir nueva funcionalidad sin alterar el código que ya funciona y ha sido probado.
 
-Ejemplo:
-
-Considera un sistema de cálculo de áreas de diferentes formas geométricas. Una primera aproximación podría ser:
+Por ejemplo, hagamos un sistema de cálculo de áreas de diferentes formas geométricas. Una primera aproximación podría ser:
 ```java
 class CalculadoraArea {
     double calcularArea(Object forma) {
@@ -93,7 +86,7 @@ class CalculadoraArea {
 }
 ```
 
-Esta clase viola el OCP. Si queremos añadir una nueva forma (ej. `Triangulo`), tendríamos que modificar la clase `CalculadoraArea` para añadir otra condición `if-else`, lo que significa que está cerrada a extensión y abierta a modificación.
+Esta clase viola el OCP. Si queremos añadir una nueva forma (por ejemplo `Triangulo`), tendríamos que modificar la clase `CalculadoraArea` para añadir otra condición `if-else`, lo que significa que está cerrada a extensión y abierta a modificación.
 
 Para aplicar el OCP, podemos usar una interfaz `Forma` y permitir que cada forma calcule su propia área:
 ```java
@@ -144,9 +137,7 @@ Los objetos de una clase base deben poder ser reemplazados por instancias de sus
 - Las invariantes de la clase base deben mantenerse en la subclase.
 - Los métodos de la subclase no deben lanzar nuevas excepciones que no estén definidas en la clase base.
 
-Ejemplo:
-
-Considera una jerarquía de clases para aves:
+Por ejemplo, hagamos una jerarquía de clases para aves:
 ```java
 class Ave {
     void volar() { /* ... */ }
@@ -165,9 +156,9 @@ class Pinguino extends Ave {
 }
 ```
 
-Aquí, la clase `Pinguino` viola el LSP. Aunque `Pinguino` es un `Ave`, no puede reemplazar a `Ave` en un contexto donde se espera que `Ave` pueda volar, porque `Pinguino.volar()` lanza una excepción. Esto significa que si tienes un código que opera con una lista de `Ave`s y espera que todas puedan volar, el programa fallará si encuentra un `Pinguino`.
+Aquí, la clase `Pinguino` viola el LSP. Aunque `Pinguino` es un `Ave`, no puede reemplazar a `Ave` en un contexto donde se espera que `Ave` pueda volar, porque `Pinguino.volar()` lanza una excepción. Esto significa que si tenemos código que funciona con una lista de `Ave`s y espera que todas puedan volar, el programa falla si encuentra un `Pinguino`.
 
-Para respetar el LSP, se podría refactorizar la jerarquía:
+Para respetar el LSP, podemos refactorizar la jerarquía:
 ```java
 interface Volador {
     void volar();
@@ -187,7 +178,7 @@ class Pinguino extends Ave {
 }
 ```
 
-Ahora, el código que interactúa con aves voladoras lo hará a través de la interfaz `Volador`, asegurando que solo las aves que realmente pueden volar sean tratadas como tales. Los pingüinos, aunque son aves, no se considerarán `Volador`es, manteniendo la consistencia.
+Ahora, el código interactúa con aves voladoras a través de la interfaz `Volador`, asegurando que solo las aves que realmente pueden volar sean tratadas como tales. Los pingüinos, aunque son aves, no se considerarán `Volador`, manteniendo la consistencia.
 
 ---
 
@@ -195,9 +186,7 @@ Ahora, el código que interactúa con aves voladoras lo hará a través de la in
 
 Los clientes no deben ser forzados a depender de interfaces que no utilizan. Es mejor dividir una interfaz grande y monolítica en interfaces más pequeñas y específicas, de modo que cada una sea relevante para un conjunto particular de clientes. Esto reduce el acoplamiento y evita que las clases implementen métodos que no necesitan, promoviendo la cohesión.
 
-Ejemplo:
-
-Imagina una interfaz Trabajador con muchos métodos:
+Poe ejemplo, hagamos una interfaz `Trabajador` con muchos métodos:
 ```java
 interface Trabajador {
     void trabajar();
@@ -275,9 +264,7 @@ Establece que:
 
 En esencia, este principio sugiere que las dependencias deben apuntar hacia abstracciones (interfaces o clases abstractas) en lugar de implementaciones concretas. Esto invierte la forma tradicional en que el control fluye en un programa, de ahí el término "inversión". Al depender de abstracciones, los módulos de alto nivel se desacoplan de los detalles de implementación de los módulos de bajo nivel, lo que mejora la flexibilidad, la reusabilidad y la capacidad de prueba del código.
 
-Ejemplo:
-
-Imagina un módulo de alto nivel Notificador que envía notificaciones y depende directamente de una implementación de bajo nivel EmailSender:
+Por ejemplo. hagamos una clase `Notificador` que envía notificaciones y depende directamente de una implementación de bajo nivel EmailSender:
 ```java
 class EmailSender {
     void enviarEmail(String destinatario, String mensaje) { /* ... */ }
@@ -296,9 +283,9 @@ class Notificador {
 }
 ```
 
-Esta implementación viola el DIP porque `Notificador` (módulo de alto nivel) depende directamente de `EmailSender` (módulo de bajo nivel). Si queremos cambiar la forma de notificación (ej. SMS, push), tendríamos que modificar `Notificador`.
+Esta implementación viola el DIP porque `Notificador` (de alto nivel) depende directamente de `EmailSender` (de bajo nivel). Si queremos cambiar la forma de notificación (por ejemplo SMS), tendríamos que modificar `Notificador`.
 
-Para aplicar el DIP, introducimos una abstracción (interfaz):
+Para aplicar el DIP, usamos una abstracción (interfaz):
 ```java
 interface Mensajero {
     void enviar(String destinatario, String mensaje);
@@ -332,4 +319,4 @@ class Notificador {
 }
 ```
 
-Ahora, `Notificador` (módulo de alto nivel) no depende de `EmailSender` o `SmsSender` (módulos de bajo nivel), sino de la abstracción `Mensajero`. Podemos "inyectar" diferentes implementaciones de `Mensajero` en `Notificador` sin modificar su código. Esto hace que el `Notificador` sea mucho más flexible y fácil de probar, ya que se pueden sustituir fácilmente los servicios de mensajería.
+Ahora, `Notificador` (de alto nivel) no depende de `EmailSender` o `SmsSender` (de bajo nivel), sino de la abstracción `Mensajero`. Podemos "inyectar" diferentes implementaciones de `Mensajero` en `Notificador` sin modificar su código. Esto hace que el `Notificador` sea mucho más flexible y fácil de probar, ya que se pueden sustituir fácilmente los servicios de mensajería.
