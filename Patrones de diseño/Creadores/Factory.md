@@ -1,95 +1,106 @@
-Provee una **interfaz** para crear **objetos** en una **superclase**, pero permite a las **subclases** alterar el tipo de **objeto** creado.
+El patrón **Factory Method** (Método de Fábrica) es un patrón de diseño creacional que permite crear objetos sin especificar la clase exacta del objeto que se creará. En lugar de usar el operador `new` directamente, se delega la creación de objetos a un método de "fábrica" en una subclase. Esto hace que el código sea más flexible y extensible, ya que se pueden introducir nuevos tipos de objetos sin modificar el código cliente existente. Es especialmente útil cuando:
 
-# Ejemplo en UML
+- Una clase no puede anticipar la clase de objetos que necesita crear.
+- Una clase quiere que sus subclases especifiquen los objetos a crear.
+- Las clases delegan la responsabilidad a una de las varias subclases auxiliares.
 
-![Factory](https://github.com/user-attachments/assets/14193c6d-3017-4560-8a31-6584d2e6284c)
+# Ejemplo UML
+
+![Factory](https://github.com/user-attachments/assets/ef279c9c-945e-4bf4-98b3-fbdde8d3bbce)
 
 # Ejemplo en código
+
 ```java
-// Interfaz de los motores
-public interface Motor {
-    void arrancar();
-    void frenar();
+// La clase creadora declara el método fábrica, que debe devolver un
+// objeto de un producto.
+// Las subclases del creador implementarán este método para producir
+// tipos específicos de productos.
+public abstract class Dialogo {
+    
+    public void crearVentana() {
+        // El creador no sabe qué producto concreto se producirá,
+        // pero sabe que todos los productos concretos implementan
+        // la interfaz Boton.
+        Boton botonOk = crearBoton(); 
+        botonOk.mostrar();
+    }
+
+    // Este es el "método fábrica" que deben implementar las subclases
+    public abstract Boton crearBoton();
 }
 
-// Clases de motores concretos
-public class MotorNafta implements Motor {
+public class DialogoHTML extends Dialogo {
+    // Esta subclase concreta implementa el método fábrica
+    // para producir un producto HTML (BotonHtml).
     @Override
-    public void arrancar() {
-        System.out.println("Motor a nafta arranca.");
-    }
-
-    @Override
-    public void frenar() {
-        System.out.println("Motor a nafta se detiene.");
-    }
-}
-
-public class MotorElectrico implements Motor {
-    @Override
-    public void arrancar() {
-        System.out.println("Motor eléctrico se enciende.");
-    }
-
-    @Override
-    public void frenar() {
-        System.out.println("Motor eléctrico frena.");
+    public Boton crearBoton() {
+        return new BotonHtml();
     }
 }
 
-// Clase abstracta que maneja todo tipo de auto
-public abstract class Auto {
-    public void manejar() {
-        // El motor se crea dentro de esta clase
-        Motor motor = crearMotor();
-        motor.arrancar();
-        System.out.println("El auto está andando.");
-        motor.frenar();
-    }
-
-	// Cada clase de auto concreto implementa su propia versión de este método
-    public abstract Motor crearMotor();
-}
-
-// Estos son los creadores concretos
-public class GolPower extends Auto {
+public class DialogoWindows extends Dialogo {
+    // Esta subclase concreta implementa el método fábrica
+    // para producir un producto de Windows (BotonWindows).
     @Override
-    public Motor crearMotor() {
-        return new MotorNafta();
+    public Boton crearBoton() {
+        return new BotonWindows();
     }
 }
 
-public class TeslaModeloX extends Auto {
-    @Override
-    public Motor crearMotor() {
-        return new MotorElectrico();
+// La interfaz del producto. Declara las operaciones comunes que todos los productos concretos deben implementar.
+public interface Boton {
+    void mostrar();
+    void clickHecho();
+}
+
+// Un producto concreto que implementa la interfaz del producto.
+public class BotonHtml implements Boton {
+    public void mostrar() {
+        System.out.println("<Boton>Boton HTML</Boton>");
+        clickHecho();
+    }
+
+    public void clickHecho() {
+        System.out.println("Click! Botón HTML dice - 'Hola mundo!'");
     }
 }
 
-// Ejemplo de uso
+// Otro producto concreto que implementa la interfaz del producto.
+public class BotonWindows implements Boton {
+    public void mostrar() {
+        System.out.println("<Boton>Boton Windows</Boton>");
+        clickHecho();
+    }
+
+    public void clickHecho() {
+        System.out.println("Click! Botón Windows dice - 'Hola mundo!'");
+    }
+}
+
 public class Demo {
-    private static Auto auto;
+    private static Dialogo dialogo;
 
     public static void main(String[] args) {
-        configurarAuto();
-        cosasAuto();
+        configurar();
+        hacerCosas();
     }
 
-    static void configurarAuto() {
-        // Esta cadena puede ser ingresada por el usuario, definida por
-        // una condición, etcétera.
-        String tipoAuto = "Tesla";
-		
-		// Aquí se decide cual Auto instanciar
-        if (tipoAuto.equalsIgnoreCase("Tesla")) {
-            Auto = new TeslaModeloX();
+    static void configurar() {
+        // La lógica de configuración decide qué creador concreto instanciar,
+        // basándose en algún criterio (en este caso, el sistema operativo).
+        // Esto desacopla el código del cliente de la creación de
+        // productos concretos.
+        if (System.getProperty("os.name").equals("Windows 10")) {
+            dialogo = new DialogoWindows();
         } else {
-            Auto = new GolPower();
+            dialogo = new DialogoHTML();
         }
     }
 
-    static void cosasAuto() {
-        Auto.manejar();
+    static void hacerCosas() {
+        // El cliente trabaja con la interfaz del creador y su método fábrica,
+        // sin preocuparse por la clase concreta del producto que se crea.
+        dialogo.crearVentana();
     }
 }
 ```
